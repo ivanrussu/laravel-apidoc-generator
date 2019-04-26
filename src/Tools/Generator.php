@@ -51,6 +51,7 @@ class Generator
         $docBlock = $this->parseDocBlock($method);
         $bodyParameters = $this->getBodyParameters($method, $docBlock['tags']);
         $queryParameters = $this->getQueryParametersFromDocBlock($docBlock['tags']);
+        $jsonRequest = $this->getJsonRequestFromDocBlock($docBlock['tags']);
         $content = ResponseResolver::getResponse($route, $docBlock['tags'], [
             'rules' => $rulesToApply,
             'body' => $bodyParameters,
@@ -70,6 +71,7 @@ class Generator
             'authenticated' => $this->getAuthStatusFromDocBlock($docBlock['tags']),
             'response' => $content,
             'showresponse' => ! empty($content),
+            'jsonRequest' => $jsonRequest,
         ];
         $parsedRoute['headers'] = $rulesToApply['headers'] ?? [];
 
@@ -343,5 +345,26 @@ class Generator
         }
 
         return $value;
+    }
+
+    private function getJsonRequestFromDocBlock($tags)
+    {
+        /** @var Tag[] $requestFileTags */
+        $requestFileTags = array_values(
+            array_filter($tags, function ($tag) {
+                return $tag instanceof Tag && strtolower($tag->getName()) === 'jsonrequest';
+            })
+        );
+
+        if (count($requestFileTags) !== 1) {
+            return null;
+        }
+
+        $requestFileTag = $requestFileTags[0];
+
+        $filePath = storage_path(trim($requestFileTag->getContent()));
+
+        return file_exists($filePath) ? file_get_contents($filePath, true) : null;
+
     }
 }

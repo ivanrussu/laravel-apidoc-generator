@@ -42,14 +42,56 @@ class CollectionWriter
                     'item' => $routes->map(function ($route) {
                         $mode = $route['methods'][0] === 'PUT' ? 'urlencoded' : 'formdata';
 
-                        return [
-                            'name' => $route['title'] != '' ? $route['title'] : url($route['uri']),
+                        $mode = isset($route['jsonRequest']) ? 'raw' : $mode;
+
+                        $routeUri = url($route['uri']);
+
+                        $queryParameters = array_map(
+                            static function ($val) {
+                                return $val['value'] ?? '';
+                            },
+                            $route['queryParameters'] ?? []
+                        );
+                        $queryParams = [];
+
+                        foreach ($queryParameters as $key => $value) {
+                            $queryParams[] = [
+                                'key' => $key,
+                                'value' => $value,
+                            ];
+                        }
+
+                        $queryPart = empty($queryParameters) ? '' : ('?' . http_build_query($queryParameters));
+
+                        $routeParts = parse_url($routeUri);
+
+
+                        $protocol = $routeParts['scheme'];
+
+                        $result = [
+                            'name' => $route['title'] != '' ? $route['title'] : $route,
                             'request' => [
-                                'url' => url($route['uri']),
+                                'url'    => [
+                                    'raw' => $routeUri . $queryPart,
+                                    'protocol' => $protocol,
+                                    'host' => explode('.', $routeParts['host']),
+                                    'path' => explode('/', trim($routeParts['path'], '/')),
+                                    'query' => $queryParams,
+                                ],
                                 'method' => $route['methods'][0],
-                                'body' => [
+                                'header' => $mode === 'raw'
+                                    ? [
+                                        [
+                                            'key'   => 'Content-Type',
+                                            'name'  => 'Content-Type',
+                                            'value' => 'application/json',
+                                            'type'  => 'text',
+                                        ],
+                                    ]
+                                    : [],
+                                'body'   => [
                                     'mode' => $mode,
-                                    $mode => collect($route['bodyParameters'])->map(function ($parameter, $key) {
+                                    $mode => $mode === 'raw' ? $route['jsonRequest'] : collect($route['bodyParameters'])->map(function ($parameter, $key) {
                                         return [
                                             'key' => $key,
                                             'value' => isset($parameter['value']) ? $parameter['value'] : '',
@@ -62,6 +104,14 @@ class CollectionWriter
                                 'response' => [],
                             ],
                         ];
+
+                        if ($mode === 'raw') {
+                            $result['protocolProfileBehavior'] = [
+                                'disableBodyPruning' => true
+                            ];
+                        }
+
+                        return $result;
                     })->toArray(),
                 ];
             })->values()->toArray(),
