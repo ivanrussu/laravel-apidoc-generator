@@ -52,10 +52,9 @@ let headers = {
 @endif
 }
 @if (empty($route['jsonRequest']))
-    @if(count($route['bodyParameters']))
-
-        let body = {!! json_encode($route['cleanBodyParameters'], JSON_PRETTY_PRINT) !!}
-    @endif
+@if(count($route['bodyParameters']))
+let body = {!! json_encode($route['cleanBodyParameters'], JSON_PRETTY_PRINT) !!}
+@endif
 @endif
 fetch(url, {
 method: "{{$route['methods'][0]}}",
