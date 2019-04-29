@@ -26,14 +26,19 @@ curl -X {{$route['methods'][0]}} {{$route['methods'][0] == 'GET' ? '-G ' : ''}}"
 
 ```javascript
 const url = new URL("{{ rtrim(config('app.docs_url') ?: config('app.url'), '/') }}/{{ ltrim($route['uri'], '/') }}");
-@if(count($route['queryParameters']))
 
-    let params = {
-    @foreach($route['queryParameters'] as $attribute => $parameter)
-        "{{ $attribute }}": "{{ $parameter['value'] }}",
-    @endforeach
-    };
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+@if (empty($route['jsonRequest']))
+    @if(count($route['queryParameters']))
+
+        let params = {
+        @foreach($route['queryParameters'] as $attribute => $parameter)
+            "{{ $attribute }}": "{{ $parameter['value'] }}",
+        @endforeach
+        };
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    @endif
+@else
+    let body = JSON.stringify({!! json_encode(json_decode($route['jsonRequest'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)  !!})
 @endif
 
 let headers = {
@@ -47,16 +52,22 @@ let headers = {
     "Content-Type": "application/json",
 @endif
 }
-@if(count($route['bodyParameters']))
+@if (empty($route['jsonRequest']))
+    @if(count($route['bodyParameters']))
 
-let body = {!! json_encode($route['cleanBodyParameters'], JSON_PRETTY_PRINT) !!}
+        let body = {!! json_encode($route['cleanBodyParameters'], JSON_PRETTY_PRINT) !!}
+    @endif
 @endif
-
 fetch(url, {
-    method: "{{$route['methods'][0]}}",
-    headers: headers,
-@if(count($route['bodyParameters']))
-    body: body
+method: "{{$route['methods'][0]}}",
+headers: headers,
+@if((!empty($route['jsonRequest']) || count($route['bodyParameters'])))
+    @if(in_array('GET', $route['methods'], true))
+        // HEAD or GET Request cannot have a body.
+        // body: body
+    @else
+        body: body
+    @endif
 @endif
 })
     .then(response => response.json())
