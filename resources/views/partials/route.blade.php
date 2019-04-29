@@ -28,17 +28,16 @@ curl -X {{$route['methods'][0]}} {{$route['methods'][0] == 'GET' ? '-G ' : ''}}"
 const url = new URL("{{ rtrim(config('app.docs_url') ?: config('app.url'), '/') }}/{{ ltrim($route['uri'], '/') }}");
 
 @if (empty($route['jsonRequest']))
-    @if(count($route['queryParameters']))
-
-        let params = {
-        @foreach($route['queryParameters'] as $attribute => $parameter)
-            "{{ $attribute }}": "{{ $parameter['value'] }}",
-        @endforeach
-        };
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-    @endif
+@if(count($route['queryParameters']))
+let params = {
+@foreach($route['queryParameters'] as $attribute => $parameter)
+    "{{ $attribute }}": "{{ $parameter['value'] }}",
+@endforeach
+};
+Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+@endif
 @else
-    let body = JSON.stringify({!! json_encode(json_decode($route['jsonRequest'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)  !!})
+let body = JSON.stringify({!! json_encode(json_decode($route['jsonRequest'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)  !!})
 @endif
 
 let headers = {
