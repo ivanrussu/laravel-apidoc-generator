@@ -3,10 +3,10 @@
 @else## {{$route['uri']}}@endif
 @if($route['authenticated'])
 
-<br><small style="padding: 1px 9px 2px;font-weight: bold;white-space: nowrap;color: #ffffff;-webkit-border-radius: 9px;-moz-border-radius: 9px;border-radius: 9px;background-color: #3a87ad;">Requires authentication</small>@endif
+    <br><small style="padding: 1px 9px 2px;font-weight: bold;white-space: nowrap;color: #ffffff;-webkit-border-radius: 9px;-moz-border-radius: 9px;border-radius: 9px;background-color: #3a87ad;">Requires authentication</small>@endif
 @if($route['description'])
 
-{!! $route['description'] !!}
+    {!! $route['description'] !!}
 @endif
 
 > Example request:
@@ -27,7 +27,6 @@ curl -X {{$route['methods'][0]}} {{$route['methods'][0] == 'GET' ? '-G ' : ''}}"
 ```javascript
 const url = new URL("{{ rtrim(config('app.docs_url') ?: config('app.url'), '/') }}/{{ ltrim($route['uri'], '/') }}");
 
-@if (empty($route['jsonRequest']))
 @if(count($route['queryParameters']))
 let params = {
 @foreach($route['queryParameters'] as $attribute => $parameter)
@@ -35,9 +34,6 @@ let params = {
 @endforeach
 };
 Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-@endif
-@else
-let body = JSON.stringify({!! json_encode(json_decode($route['jsonRequest'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)  !!})
 @endif
 
 let headers = {
@@ -55,21 +51,24 @@ let headers = {
 @if(count($route['bodyParameters']))
 let body = {!! json_encode($route['cleanBodyParameters'], JSON_PRETTY_PRINT) !!}
 @endif
+@else
+let body = JSON.stringify({!! json_encode(json_decode($route['jsonRequest'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)  !!})
 @endif
+
 fetch(url, {
-method: "{{$route['methods'][0]}}",
-headers: headers,
+    method: "{{$route['methods'][0]}}",
+    headers: headers,
 @if((!empty($route['jsonRequest']) || count($route['bodyParameters'])))
-    @if(in_array('GET', $route['methods'], true))
-        // HEAD or GET Request cannot have a body.
-        // body: body
-    @else
-        body: body
-    @endif
+@if(in_array('GET', $route['methods'], true))
+    // HEAD or GET Request cannot have a body.
+    // body: body
+@else
+    body: body
+@endif
 @endif
 })
-    .then(response => response.json())
-    .then(json => console.log(json));
+.then(response => response.json())
+.then(json => console.log(json));
 ```
 
 @if(in_array('GET',$route['methods']) || (isset($route['showresponse']) && $route['showresponse']))
