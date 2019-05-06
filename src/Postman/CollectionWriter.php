@@ -69,7 +69,7 @@ class CollectionWriter
                         $protocol = $routeParts['scheme'];
 
                         $result = [
-                            'name' => $route['title'] != '' ? $route['title'] : $route,
+                            'name' => $route['title'] != '' ? $route['title'] : $route['uri'],
                             'request' => [
                                 'url'    => [
                                     'raw' => $routeUri . $queryPart,
