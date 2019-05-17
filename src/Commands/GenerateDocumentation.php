@@ -75,18 +75,24 @@ class GenerateDocumentation extends Command
     {
         $outputPath = config('apidoc.output');
         $postmanCollectionUrl = config('apidoc.postman.public_url');
-        $targetFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'index.md';
-        $compareFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'.compare.md';
-        $prependFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'prepend.md';
-        $appendFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'append.md';
+
+        if ($postmanCollectionUrl === null) {
+            $postmanCollectionUrl = ltrim($outputPath, 'public/');
+        }
+
+        $targetFile = $outputPath . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR . 'index.md';
+        $compareFile = $outputPath . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR . '.compare.md';
+        $prependFile = $outputPath . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR . 'prepend.md';
+        $appendFile = $outputPath . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR . 'append.md';
 
         $infoText = view('apidoc::partials.info')
-            ->with('outputPath', $postmanCollectionUrl ?: ltrim($outputPath, 'public/'))
-            ->with('showPostmanCollectionButton', $this->shouldGeneratePostmanCollection());
+            ->with('outputPath', $postmanCollectionUrl)
+            ->with('showPostmanCollectionButton', $this->shouldGeneratePostmanCollection())
+        ;
 
-        $parsedRouteOutput = $parsedRoutes->map(function ($routeGroup) {
-            return $routeGroup->map(function ($route) {
-                if (count($route['cleanBodyParameters']) && ! isset($route['headers']['Content-Type'])) {
+        $parsedRouteOutput = $parsedRoutes->map(static function ($routeGroup) {
+            return $routeGroup->map(static function ($route) {
+                if (! isset($route['headers']['Content-Type']) && count($route['cleanBodyParameters'])) {
                     $route['headers']['Content-Type'] = 'application/json';
                 }
                 $route['output'] = (string) view('apidoc::partials.route')->with('route', $route)->render();
