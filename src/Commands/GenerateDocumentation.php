@@ -74,13 +74,14 @@ class GenerateDocumentation extends Command
     private function writeMarkdown($parsedRoutes)
     {
         $outputPath = config('apidoc.output');
+        $postmanCollectionUrl = config('apidoc.postman.public_url');
         $targetFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'index.md';
         $compareFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'.compare.md';
         $prependFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'prepend.md';
         $appendFile = $outputPath.DIRECTORY_SEPARATOR.'source'.DIRECTORY_SEPARATOR.'append.md';
 
         $infoText = view('apidoc::partials.info')
-            ->with('outputPath', ltrim($outputPath, 'public/'))
+            ->with('outputPath', $postmanCollectionUrl ?: ltrim($outputPath, 'public/'))
             ->with('showPostmanCollectionButton', $this->shouldGeneratePostmanCollection());
 
         $parsedRouteOutput = $parsedRoutes->map(function ($routeGroup) {
