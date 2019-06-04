@@ -67,6 +67,7 @@ class Generator
             'uri' => $this->getUri($route),
             'bodyParameters' => $bodyParameters,
             'cleanBodyParameters' => $this->cleanParams($bodyParameters),
+            'cleanQueryParameters' => $this->cleanParams($queryParameters),
             'queryParameters' => $queryParameters,
             'authenticated' => $this->getAuthStatusFromDocBlock($docBlock['tags']),
             'response' => $content,
