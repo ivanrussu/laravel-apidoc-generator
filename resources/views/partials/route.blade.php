@@ -23,6 +23,12 @@ curl -X {{$route['methods'][0]}} {{$route['methods'][0] == 'GET' ? '-G ' : ''}}"
 @endif
 @if(count($route['cleanBodyParameters']))
     -d '{!! json_encode($route['cleanBodyParameters']) !!}'
+@else
+@if(!empty($route['jsonRequest']))
+    -H 'Content-Type: application/json' \
+    -H 'cache-control: no-cache' \
+    -d '{!! json_encode(json_decode($route['jsonRequest'], true), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)  !!}'
+@endif
 @endif
 
 ```
