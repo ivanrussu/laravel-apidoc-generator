@@ -382,12 +382,12 @@ class Generator
 
     private function generateSmartValue($example)
     {
-        if (preg_match('#^\{\{(.+)\}\}$#', $example, $matches)
-            && count($matches) === 2
-            && isset($this->variables[$matches[1]])
-        ) {
-            return $this->variables[$matches[1]];
-        }
+//        if (preg_match('#^\{\{(.+)\}\}$#', $example, $matches)
+//            && count($matches) === 2
+//            && isset($this->variables[$matches[1]])
+//        ) {
+//            return $this->variables[$matches[1]];
+//        }
 
         return $example;
     }
