@@ -128,6 +128,21 @@ class CollectionWriter
 
     private function getVariables(): array
     {
-        return config('apidoc.variables', []);
+        static $variables = null;
+        if (null === $variables) {
+            $variables = [];
+            $vars = config('apidoc.variables', array());
+
+            foreach ($vars as $key => $value) {
+                $variables[] = [
+                    'id'    => Uuid::uuid4()->toString(),
+                    'key'   => $key,
+                    'value' => is_scalar($value) ? $value : serialize($value),
+                    'type'  => 'string',
+                ];
+            }
+        }
+
+        return $variables;
     }
 }
