@@ -185,6 +185,8 @@ class Generator
                     $value = str_contains($description, ['number', 'count', 'page'])
                         ? $this->generateDummyValue('integer')
                         : $this->generateDummyValue('string');
+                } else {
+                    $value = $this->generateSmartValue($value);
                 }
 
                 return [$name => compact('description', 'required', 'value')];
