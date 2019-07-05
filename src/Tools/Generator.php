@@ -13,6 +13,10 @@ use Mpociot\ApiDoc\Tools\Traits\ParamHelpers;
 class Generator
 {
     use ParamHelpers;
+    /**
+     * @var \Illuminate\Config\Repository
+     */
+    private $variables;
 
     /**
      * @param Route $route
@@ -140,7 +144,7 @@ class Generator
 
                 $type = $this->normalizeParameterType($type);
                 list($description, $example) = $this->parseDescription($description, $type);
-                $value = is_null($example) ? $this->generateDummyValue($type) : $example;
+                $value = is_null($example) ? $this->generateDummyValue($type) : $this->generateSmartValue($example);
 
                 return [$name => compact('type', 'description', 'required', 'value')];
             })->toArray();
@@ -367,5 +371,22 @@ class Generator
 
         return file_exists($filePath) ? file_get_contents($filePath, true) : null;
 
+    }
+
+    public function __construct()
+    {
+        $this->variables = config('apidoc.variables', []);
+    }
+
+    private function generateSmartValue($example)
+    {
+        if (preg_match('#^\{\{(.+)\}\}$#', $example, $matches)
+            && count($matches) === 2
+            && isset($this->variables[$matches[1]])
+        ) {
+            return $this->variables[$matches[1]];
+        }
+
+        return $example;
     }
 }

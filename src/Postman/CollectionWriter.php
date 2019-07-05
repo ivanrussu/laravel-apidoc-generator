@@ -28,7 +28,7 @@ class CollectionWriter
         URL::forceRootUrl(config('app.url'));
 
         $collection = [
-            'variables' => [],
+            'variable' => $this->getVariables(),
             'info' => [
                 'name' => config('apidoc.postman.name') ?: config('app.name').' API',
                 '_postman_id' => Uuid::uuid4()->toString(),
@@ -39,7 +39,7 @@ class CollectionWriter
                 return [
                     'name' => $groupName,
                     'description' => '',
-                    'item' => $routes->map(function ($route) {
+                    'item' => $routes->map(static function ($route) {
                         $mode = $route['methods'][0] === 'PUT' ? 'urlencoded' : 'formdata';
 
                         $mode = isset($route['jsonRequest']) ? 'raw' : $mode;
@@ -61,7 +61,13 @@ class CollectionWriter
                             ];
                         }
 
-                        $queryPart = empty($queryParameters) ? '' : ('?' . http_build_query($queryParameters));
+                        $queryPart = empty($queryParameters) ? '' : ('?' . str_replace(
+                                array('%7B%7B', '%7D%7D'),
+                                array('{{', '}}'),
+                                http_build_query(
+                                    $queryParameters
+                                )
+                            ));
 
                         $routeParts = parse_url($routeUri);
 
@@ -118,5 +124,10 @@ class CollectionWriter
         ];
 
         return json_encode($collection);
+    }
+
+    private function getVariables(): array
+    {
+        return config('apidoc.variables', []);
     }
 }
