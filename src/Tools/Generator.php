@@ -62,6 +62,7 @@ class Generator
             'query' => $queryParameters,
         ]);
 
+        $cleanParams = $this->cleanParams($queryParameters);
         $parsedRoute = [
             'id' => md5($this->getUri($route).':'.implode($this->getMethods($route))),
             'group' => $routeGroup,
@@ -71,7 +72,14 @@ class Generator
             'uri' => $this->getUri($route),
             'bodyParameters' => $bodyParameters,
             'cleanBodyParameters' => $this->cleanParams($bodyParameters),
-            'cleanQueryParameters' => $this->cleanParams($queryParameters),
+            'cleanQueryParameters' => $cleanParams,
+            'cleanQueryParametersReady' =>  $cleanParams ? ('?' . str_replace(
+                    array('%7B%7B', '%7D%7D'),
+                    array('{{', '}}'),
+                    http_build_query(
+                        $cleanParams
+                    )
+                )) : '',
             'queryParameters' => $queryParameters,
             'authenticated' => $this->getAuthStatusFromDocBlock($docBlock['tags']),
             'response' => $content,
