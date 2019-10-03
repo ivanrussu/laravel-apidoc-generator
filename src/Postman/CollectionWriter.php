@@ -77,13 +77,16 @@ class CollectionWriter
                         $result = [
                             'name' => $route['title'] != '' ? $route['title'] : $route['uri'],
                             'request' => [
-                                'url'    => [
-                                    'raw' => $routeUri . $queryPart,
+                                'url' => array_filter([
+                                    'raw'      => $routeUri . $queryPart,
                                     'protocol' => $protocol,
-                                    'host' => explode('.', $routeParts['host']),
-                                    'path' => explode('/', trim($routeParts['path'], '/')),
-                                    'query' => $queryParams,
-                                ],
+                                    'host'     => explode('.', $routeParts['host']),
+                                    'path'     => explode('/', trim($routeParts['path'], '/')),
+                                    'query'    => $queryParams,
+                                    'port'     => $routeParts['port'] ?? null,
+                                ], static function ($item) {
+                                    return $item !== null;
+                                }),
                                 'method' => $route['methods'][0],
                                 'header' => $mode === 'raw'
                                     ? [
