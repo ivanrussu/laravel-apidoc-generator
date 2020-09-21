@@ -366,7 +366,7 @@ class Generator
     {
         /** @var Tag[] $requestFileTags */
         $requestFileTags = array_values(
-            array_filter($tags, function ($tag) {
+            array_filter($tags, static function ($tag) {
                 return $tag instanceof Tag && strtolower($tag->getName()) === 'jsonrequest';
             })
         );
