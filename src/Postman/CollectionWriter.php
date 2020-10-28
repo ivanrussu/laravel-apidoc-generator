@@ -72,13 +72,23 @@ class CollectionWriter
                         $routeParts = parse_url($routeUri);
 
 
+
+                        $rawURL = str_replace(
+                                sprintf('%s://%s', $routeParts['scheme'] ?? '', $routeParts['host'] ?? ''),
+                                '{{endpoint}}',
+                                $routeUri
+                            ) . $queryPart;
+
+                        $routeParts['scheme'] = '';
+                        $routeParts['host'] = '{{endpoint}}';
+
                         $protocol = $routeParts['scheme'];
 
                         $result = [
                             'name' => $route['title'] != '' ? $route['title'] : $route['uri'],
                             'request' => [
                                 'url' => array_filter([
-                                    'raw'      => $routeUri . $queryPart,
+                                    'raw'      => $rawURL,
                                     'protocol' => $protocol,
                                     'host'     => explode('.', $routeParts['host']),
                                     'path'     => explode('/', trim($routeParts['path'], '/')),
@@ -135,6 +145,9 @@ class CollectionWriter
         if (null === $variables) {
             $variables = [];
             $vars = config('apidoc.variables', array());
+            if (!array_key_exists('endpoint', $vars)) {
+                $vars['endpoint'] = env('APP_URL', '');
+            }
 
             foreach ($vars as $key => $value) {
                 $variables[] = [
