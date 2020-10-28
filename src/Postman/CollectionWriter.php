@@ -74,12 +74,13 @@ class CollectionWriter
 
 
                         $rawURL = str_replace(
-                                sprintf('%s://%s', $routeParts['scheme'] ?? '', $routeParts['host'] ?? ''),
+                                sprintf('%s://%s%s', $routeParts['scheme'] ?? '', $routeParts['host'] ?? '', isset($routeParts['port']) ? ':' . $routeParts['port'] : ''),
                                 '{{endpoint}}',
                                 $routeUri
                             ) . $queryPart;
 
                         $routeParts['scheme'] = '';
+                        $routeParts['port'] = '';
                         $routeParts['host'] = '{{endpoint}}';
 
                         $protocol = $routeParts['scheme'];
