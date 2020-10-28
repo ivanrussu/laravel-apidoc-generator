@@ -79,8 +79,8 @@ class CollectionWriter
                                 $routeUri
                             ) . $queryPart;
 
-                        $routeParts['scheme'] = '';
-                        $routeParts['port'] = '';
+                        $routeParts['scheme'] = null;
+                        $routeParts['port'] = null;
                         $routeParts['host'] = '{{endpoint}}';
 
                         $protocol = $routeParts['scheme'];
