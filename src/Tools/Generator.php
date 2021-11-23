@@ -63,13 +63,20 @@ class Generator
         ]);
 
         $cleanParams = $this->cleanParams($queryParameters);
+
+        $uri = $this->getUri($route);
+
+        if(preg_match('/^[A-Za"-z0-9-–,\'`~<>?!#.\s()\[\]\\\\\/]*$/', $docBlock['short']) !== 1) {
+            throw new \Exception('Route title should match /^[A-Za-z0-9-–\.\s\(\)\[\]\\\/]+$/: got ' . $docBlock['short'] . ' . From ' . $uri . ' (' . str_replace('@', '::', $route->getActionName()).')');
+        }
+
         $parsedRoute = [
             'id' => md5($this->getUri($route).':'.implode($this->getMethods($route))),
             'group' => $routeGroup,
-            'title' => $docBlock['short'],
+            'title' => mb_convert_case($docBlock['short'], MB_CASE_TITLE),
             'description' => $docBlock['long'],
             'methods' => $this->getMethods($route),
-            'uri' => $this->getUri($route),
+            'uri' => $uri,
             'bodyParameters' => $bodyParameters,
             'cleanBodyParameters' => $this->cleanParams($bodyParameters),
             'cleanQueryParameters' => $cleanParams,
