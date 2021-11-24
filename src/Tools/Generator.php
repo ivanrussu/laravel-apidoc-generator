@@ -66,7 +66,7 @@ class Generator
 
         $uri = $this->getUri($route);
 
-        if(preg_match('/^[A-Za"-z0-9-–,\'`~<>?!#.\s()\[\]\\\\\/]*$/', $docBlock['short']) !== 1) {
+        if(preg_match('/^[A-Za"-z0-9-–,\'`~<>?!#.\s()\[\]\\\\\/]*$/mu', $docBlock['short']) !== 1) {
             throw new \Exception('Route title should match /^[A-Za-z0-9-–\.\s\(\)\[\]\\\/]+$/: got ' . $docBlock['short'] . ' . From ' . $uri . ' (' . str_replace('@', '::', $route->getActionName()).')');
         }
 
